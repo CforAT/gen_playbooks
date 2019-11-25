@@ -1,0 +1,35 @@
+- hosts: graylog_hosts
+  remote_user: vagrant
+  become: True
+  vars:
+    # Graylog is compatible with elasticsearch 5.x since version 2.3.0, so ensure to use the right combination for your installation
+    # Also use the right branch of the Elasticsearch Ansible role, master supports 5.x.
+    es_major_version: "5.x"
+    es_instance_name: 'graylog'
+    es_scripts: False
+    es_templates: False
+    es_version_lock: False
+    es_heap_size: 1g
+    es_config: {
+      node.name: "graylog",
+      cluster.name: "graylog",
+      http.port: 9200,
+      transport.tcp.port: 9300,
+      network.host: 0.0.0.0,
+      node.data: true,
+      node.master: true,
+    }
+
+    # Elasticsearch role already installed Java
+    graylog_install_java: False
+
+    graylog_install_mongodb: True
+
+    # For Vagrant installations make sure port 9000 is forwarded
+    # graylog_web_endpoint_uri: 'http://localhost:9000/api/'
+    # For other setups, use the external IP of the Graylog server
+    graylog_web_endpoint_uri: 'http://{{ ansible_host }}:9000/api/'
+
+  roles:
+    - role: 'Graylog2.graylog-ansible-role'
+      tags: graylog

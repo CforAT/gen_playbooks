@@ -1,0 +1,8 @@
+- hosts: all
+  tasks:
+
+  - name: enable dotnet 4.5
+    win_optional_feature:
+        name:
+        - 
+    

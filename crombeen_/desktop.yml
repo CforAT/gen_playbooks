@@ -1,0 +1,367 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2016, Dag Wieers <dag@wieers.com>
+#
+# This playbook configures the desktop (background, icons). It is intended to
+# be used on newly installed systems. Or whenever this playbook changes.
+
+# TODO: Group Policies: https://msdn.microsoft.com/en-us/library/ms815238.aspx
+
+#- hosts: computerlokaal
+#  gather_facts: no
+#  tasks:
+#  - name: Clean up Downloads
+#    win_cleanup:
+#      downloads: yes
+#      system_temp: yes
+#      temp: yes
+#      user_temp: yes
+
+- hosts: computers
+  tasks:
+
+#  - name: Install PinnedItem
+#    win_psmodule:
+#      name: Pinneditem
+
+#  - name: Unpin all apps
+#    win_shell: |
+#      Get-PinnedItem -Type StartMenu | Remove-PinnedItem
+#
+#      Install-Module -Name PinnedItem
+#    become: yes
+#    vars:
+#      ansible_become_user: '{{ user }}'
+#      become_user: '{{ user }}'
+#      ansible_become_password: ''
+#      become_password: ''
+
+      #Get-PinnedItem -Type StartMenu | Where {$_.Name -eq 'Snipping Tool'} | Remove-PinnedItem
+#  - name: Clean up Downloads
+#    win_cleanup:
+#      items:
+#      - C:\Users\leerling\Downloads\*
+#      - C:\Windows\Temp\*
+#      system_prefetch: yes
+#      system_temp: yes
+#      user_downloads: yes
+#      user_temp: yes
+#      downloads: yes
+#      temp: yes
+#    tags: cleanup
+
+#  - name: Unpin all apps
+#    win_shell: |
+#      foreach ($item in (New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items()) {
+#        foreach ($verb in $item.Verbs()) {
+#          Write-Host "Verb $($verb.Name) -- App $($item.Name)"
+#          if ($verb.Name -match 'Van Start &losmaken|Van taa&kbalk losmaken') {
+#            $verb.DoIt()
+#            Write-Host "App $($item.Name) Verb $($verb.Name)"
+#          }
+#        }
+#      }
+
+#      function Unpin($app) {
+#        try {
+#          foreach ($item in (New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}').Items()) {
+#            if ($item.Name -eq $app) {
+#              foreach ($verb in $item.Verbs()) {
+#                if ($verb.Name.replace('&','') -match 'Van "Start" losmaken|Von "Start" lösen|Unpin from Start') {
+#                    $verb.DoIt()
+#                }
+#              }
+#            }
+#          }
+#        } catch {
+#          Write-Error "Error Pinning/Unpinning App! (App-Name correct?)"
+#        }
+#      }
+#
+#      Unpin "Mail"
+#      Unpin "Store"
+#      Unpin "Calendar"
+#      Unpin "Microsoft Edge"
+#      Unpin "Photos"
+#      Unpin "Cortana"
+#      Unpin "Weather"
+#      Unpin "Phone Companion"
+#      Unpin "Twitter"
+#      Unpin "Skype Video"
+#      Unpin "Candy Crush Soda Saga"
+#      Unpin "xbox"
+#      Unpin "Groove music"
+#      Unpin "movies & tv"
+#      Unpin "microsoft solitaire collection"
+#      Unpin "money"
+#      Unpin "get office"
+#      Unpin "onenote"
+#      Unpin "news"
+#    become: yes
+#    vars:
+#      ansible_become_user: '{{ user }}'
+#      become_user: '{{ user }}'
+#      ansible_become_password: ''
+#      become_password: ''
+#    tags: tiles
+
+  - name: Add shortcut icons
+    win_copy:
+      src: files/icons/{{ item }}
+      dest: '%Public%\Pictures\{{ item }}'
+    with_items:
+    - bingel2.ico
+    - computermeester2.ico
+    - gmail2.ico
+    - iomniwize.ico
+    - kweetet3.ico
+    - scratch2.ico
+    - symbaloo2.ico
+    tags: icons
+
+  - name: Add default desktop shortcuts
+    win_shortcut:
+      description: '{{ item.description }}'
+      src: '{{ ansible_env["ProgramFiles(x86)"] if "ProgramFiles(x86)" in ansible_env else ansible_env.ProgramFiles }}\Google\Chrome\Application\chrome.exe'
+      arguments: '--new-window {{ item.url }} {{ item.arguments|default("") }}'
+      dest: '{{ item.dest }}'
+      icon: '{{ item.icon | default(",0") }}'
+      windowstyle: '{{ item.windowstyle | default("normal") }}'
+      hotkey: '{{ item.hotkey | default(omit) }}'
+      state: present
+    with_items:
+    - description: ComputerMeester website
+      url: http://computermeester.be/
+      dest: '%Public%\Desktop\Computer Meester.lnk'
+      icon: '%Public%\Pictures\computermeester2.ico,0'
+      windowstyle: maximized
+#      arguments: --start-fullscreen
+    - description: Bingel website
+      url: https://www.bingel.be/bingel/login/
+      dest: '%Public%\Desktop\Bingel.lnk'
+      icon: '%Public%\Pictures\bingel2.ico,0'
+      windowstyle: maximized
+    - description: Symbaloo website
+      url: https://www.symbaloo.com/
+      dest: '%Public%\Desktop\Symbaloo.lnk'
+      icon: '%Public%\Pictures\symbaloo2.ico,0'
+      windowstyle: maximized
+      hotkey: Ctrl+Alt+S
+#      arguments: --start-fullscreen
+    - description: Scratch website
+      url: https://scratch.mit.edu/projects/editor/
+      dest: '%Public%\Desktop\Scratch.lnk'
+      icon: '%Public%\Pictures\scratch2.ico,0'
+      windowstyle: maximized
+    - description: Kweetet website
+      url: https://www.kweetet.be/leerling
+      dest: '%Public%\Desktop\Kweetet.lnk'
+      icon: '%Public%\Pictures\kweetet3.ico,0'
+      windowstyle: maximized
+    tags: shortcuts
+
+  - name: Add shortcuts for all computers
+    win_shortcut:
+      description: '{{ item.description }}'
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+      icon: '{{ item.icon|default(item.src ~ ",0") }}'
+    with_items:
+    - description: Gedeelde ictadmin bestanden
+      src: \\diskstation01.crombeen.internal\ictadmin
+      dest: '%UserProfile%\Desktop\ictadmin.lnk'
+      icon: '%SystemRoot%\System32\imageres.dll,117'
+    - description: Prullenbak
+      src: shell:RecycleBinFolder
+      dest: '%Public%\Desktop\Prullenbak.lnk'
+      icon: ',0'
+    - description: Process Explorer
+      src: C:\ProgramData\chocolatey\bin\procexp.exe
+      dest: '%UserProfile%\Desktop\Process Explorer.lnk'
+    - description: Autoruns
+      src: C:\ProgramData\chocolatey\bin\autoruns.exe
+      dest: '%UserProfile%\Desktop\Autoruns.lnk'
+    - description: WakeMeOnLan
+      src: \\diskstation01.crombeen.internal\ictadmin\Tools\WakeMeOnLan\WakeMeOnLan.exe
+      dest: '%UserProfile%\Desktop\WakeMeOnLan.lnk'
+    tags: shortcuts
+
+#  - name: Disable Windows tiles for new users
+#    win_copy:
+#      src: LayoutModification.xml
+#      dest: C:\Users\ictadmin\AppData\Local\Microsoft\Windows\Shell\LayoutModification.xml
+#    tags: tiles
+
+  # We prefer to make the Administrator background bright red
+  - name: Set red background for user ictadmin
+    win_regedit:
+      path: '{{ item.path }}'
+      name: '{{ item.name }}'
+      data: '{{ item.data }}'
+      type: '{{ item.type }}'
+    with_items:
+    - path: HKCU:\Control Panel\Desktop
+      name: Wallpaper
+      data: ''
+      type: string
+    - path: HKCU:\Control Panel\Desktop
+      name: WallpaperStyle
+      data: 10
+      type: string
+    - path: HKCU:\Control Panel\Colors
+      name: Background
+      data: '232 17 35'
+      type: string
+    tags:
+    - bg
+    - ictadmin
+    - registry
+
+  - name: Remove unwanted desktop shortcuts
+    win_shortcut:
+      dest: '{{ item }}'
+      state: absent
+    with_items:
+    - C:\Users\{{ user }}\Desktop\WinDirStat.lnk
+    - '%Public%\Desktop\Audacity.lnk'
+    - '%Public%\Desktop\CDex.lnk'
+    - '%Public%\Desktop\Firefox.lnk'
+    - '%Public%\Desktop\Google Chrome.lnk'
+    - '%Public%\Desktop\Google Earth.lnk'
+    - '%Public%\Desktop\Inkscape.lnk'
+    - '%Public%\Desktop\Inkscape 0.92.1.lnk'
+    - '%Public%\Desktop\Inkscape 0.92.2.lnk'
+    - '%Public%\Desktop\Inkscape 0.92.3.lnk'
+#    - '%Public%\Desktop\InfraRecorder.lnk'
+#    - '%Public%\Desktop\KeePass 2.lnk'
+    - '%Public%\Desktop\LibreOffice 5.1.lnk'
+    - '%Public%\Desktop\LibreOffice 5.2.lnk'
+    - '%Public%\Desktop\LibreOffice 5.3.lnk'
+    - '%Public%\Desktop\LibreOffice 5.4.lnk'
+    - '%Public%\Desktop\LibreOffice 6.0.lnk'
+    - '%Public%\Desktop\Mozilla Firefox.lnk'
+    - '%Public%\Desktop\VLC media player.lnk'
+    - '%Public%\Desktop\WinDirStat.lnk'
+    - '%Public%\Desktop\Google Drive File Stream.lnk'
+    tags:
+    - cleanup
+    - shortcuts
+
+- hosts: computerlokaal:technieklokaal
+  tasks:
+# NOTE: This moved to a scheduled task
+#  - name: Move files on Desktop to Documents
+##    win_shell: Move-Item %userprofile%\Desktop\*.* %userprofile%\Documents\ -Force
+##    become_user: leerling
+#    win_shell: Move-Item C:\Users\leerling\Desktop\* C:\Users\leerling\Documents\ -Force
+#    failed_when: no
+#    tags:
+#    - cleanup
+#    - docs
+
+  - name: Add shortcuts
+    win_shortcut:
+      description: '{{ item.description }}'
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+      icon: '{{ item.icon|default(item.src ~ ",0") }}'
+    with_items:
+    - description: Mijn Documenten
+      src: '%UserProfile%\Documents'
+      dest: '%Public%\Desktop\Documenten.lnk'
+      icon: ',0'
+    tags:
+    - shares
+    - shortcuts
+
+- hosts: klaslokaal:extra:beheer
+  tasks:
+  - name: Add Music/Video shortcuts
+    win_shortcut:
+      description: '{{ item.description }}'
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+      icon: '%SystemRoot%\System32\imageres.dll,{{ item.idx }}'
+    with_items:
+    - description: Gedeelde muziek bestanden
+      dest: '%Public%\Desktop\Muziek.lnk'
+      src: \\diskstation01.crombeen.internal\music
+      idx: 103
+    - description: Gedeelde video bestanden
+      dest: '%Public%\Desktop\Video.lnk'
+      src: \\diskstation01.crombeen.internal\video
+      idx: 178
+    tags:
+    - shares
+    - shortcuts
+
+  - name: Remove shortcuts
+    win_shortcut:
+      dest: '{{ item.dest }}'
+      state: absent
+    with_items:
+    - dest: '%Public%\Desktop\Documenten.lnk'
+    tags:
+    - clean
+    - shares
+    - shortcuts
+
+- hosts: klaslokaal:beheer
+  tasks:
+  - name: Add extra shortcuts
+    win_shortcut:
+      description: '{{ item.description }}'
+      src: '{{ ansible_env["ProgramFiles(x86)"] if "ProgramFiles(x86)" in ansible_env else ansible_env.ProgramFiles }}\Google\Chrome\Application\chrome.exe'
+      arguments: '--new-window {{ item.url }} {{ item.arguments|default("") }}'
+      dest: '{{ item.dest }}'
+      icon: '{{ item.icon | default(",0") }}'
+      windowstyle: '{{ item.windowstyle | default("normal") }}'
+      hotkey: '{{ item.hotkey | default(omit) }}'
+      state: present
+    with_items:
+    - description: iOmniwize
+      url: https://www.iomniwize.net/lpwebnew/lpUILogin.aspx
+      dest: '%Public%\Desktop\iOmniwize.lnk'
+      icon: '%Public%\Pictures\iomniwize.ico'
+    - description: Mail Crombeen
+      url: http://mail.basisschoolcrombeen.be/
+      dest: '%Public%\Desktop\E-mail.lnk'
+      icon: '%Public%\Pictures\gmail2.ico'
+    tags:
+    - shortcuts
+    - shortcuts-klas
+
+#  - name: Add Google Drive
+#    win_shortcut:
+#      description: '{{ item.description }}'
+#      src: '{{ item.src }}'
+#      dest: '{{ item.dest }}'
+#      icon: '%SystemRoot%\System32\imageres.dll,{{ item.idx }}'
+#    with_items:
+#    - description: Google Drive File Stream
+#      dest: '%Public%\Desktop\Google Drive File Stream.lnk'
+#      src: G:\
+#      idx: 217
+#    tags:
+#    - shortcuts
+#    - shortcuts-klas
+
+# Add KeePass shortcut for all users on admin systems
+- hosts: beheer
+  tasks:
+  - name: Add KeePass shortcuts
+    win_shortcut:
+      description: KeePass Password Safe 2
+      dest: '%Public%\Desktop\KeePass 2.lnk'
+      src: C:\Program Files (x86)\KeePass Password Safe 2\KeePass.exe
+    tags: keepass
+
+# Add KeePass shortcut for user ictadmin on all other systems
+- hosts: computers:!beheer
+  tasks:
+  - name: Add KeePass shortcuts
+    win_shortcut:
+      description: KeePass Password Safe 2
+      dest: Desktop\KeePass 2.lnk
+      src: C:\Program Files (x86)\KeePass Password Safe 2\KeePass.exe
+    tags: keepass

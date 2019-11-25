@@ -1,0 +1,32 @@
+- hosts: all
+  serial: 1
+  ignore_unreachable:
+  tasks:
+
+  - name: check network profile
+    win_command: "powershell.exe get-netconnectionprofile | ConvertTo-Json -depth 1"
+    register: networkCategory
+    
+  - debug: msg="network category is {{ (networkCategory.stdout | from_json).NetworkCategory }}"
+
+  - win_command: "powershell.exe restart-service nlasvc -force"
+    when: (networkCategory.stdout | from_json).NetworkCategory != 2
+
+
+#
+# - name: do PS5-only thing
+#  raw: Run-SomePS5Thing
+#  when: ansible_powershell_version >= 5
+    # Filters can deal with text too, but since it's Powershell, 
+  # let's use structured data- ConvertTo-Json gives us something Ansible
+  # can read with the from_json filter
+#  - raw: Get-NetRoute 0.0.0.0/0 | ConvertTo-Json -depth 1
+#    register: routeout
+#
+  # use from_json to read the stdout from raw and convert to a dictionary 
+  # we can pull values from
+#  - debug: msg="Default gateway is {{ (routeout.stdout | from_json).NextHop }}"
+#
+  # or do something conditionally:
+#  - debug: msg="Default gateway isn't what we expected!"
+#    when: (routeout.stdout | from_json).NextHop != "192.168.1.1"

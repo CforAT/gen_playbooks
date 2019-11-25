@@ -1,0 +1,21 @@
+- hosts: all
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: reboot windows servers
+      when: ansible_facts['os_family'] == "Windows"
+      win_reboot:
+          reboot_timeout: 1200 # not required. Maximum seconds to wait for machine to re-appear on the network and respond to a test command,This timeout is evaluated separately for both network appearance and test command success (so maximum clock time is actually twice this value)
+          msg: Reboot initiated by Ansible # not required. Message to display to users
+          connect_timeout: 15 # not required. Maximum seconds to wait for a single successful TCP connection to the WinRM endpoint before trying again
+
+    - name: reboot linux/others
+      when:
+        - ansible_facts['os_family'] != "Windows"
+      reboot:
+          pre_reboot_delay: 0 # not required. Seconds for shutdown to wait before requesting reboot.,On Linux and macOS, this is converted to minutes and rounded down. If less than 60, it will be set to 0.,On Solaris and FreeBSD, this will be seconds.
+          post_reboot_delay: 30 # not required. Seconds to wait after the reboot was successful and the connection was re-established.,This is useful if you want wait for something to settle despite your connection already working.
+          test_command: whoami # not required. Command to run on the rebooted host and expect success from to determine the machine is ready for further tasks.
+          reboot_timeout: 1200 # not required. Maximum seconds to wait for machine to reboot and respond to a test command.,This timeout is evaluated separately for both network connection and test command success so the maximum execution time for the module is twice this amount.
+          msg: Reboot initiated by Ansible # not required. Message to display to users before reboot.
+          connect_timeout: 15 # not required. Maximum seconds to wait for a successful connection to the managed hosts before trying again.,If unspecified, the default setting for the underlying connection plugin is used.

@@ -1,0 +1,24 @@
+- hosts: all
+  strategy: free
+  tasks:
+
+  - name: ensure Chocolatey itself is installed and use internal repo as source
+    win_chocolatey:
+      name: chocolatey
+      source: https://iis_host1.cforat.org/chocolatey
+      
+  - name: remove the default public source
+    win_chocolatey_source:
+      name: chocolatey
+      state: absent
+
+  - name: add new internal source
+    win_chocolatey_source:
+      name: internal repo
+      state: present
+      source: https://iis_host1.cforat.org/chocolatey
+
+  - name: update packages
+    win_chocolatey:
+      name: all
+      state: latest

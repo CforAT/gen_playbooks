@@ -1,0 +1,9 @@
+- name: Stop Azure VM
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Start virtual machine
+      azure_rm_virtualmachine:
+        resource_group: azure_prox1
+        name: azure_prox1
+        allocated: yes

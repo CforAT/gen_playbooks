@@ -1,0 +1,23 @@
+- hosts: all
+  serial: "{{ serial_level | default('1') }}"
+  ignore_unreachable: True
+  tasks:
+
+#  - name: Warn logged in users of impending shutdown
+#    win_toast:
+#      expire: 60
+#      title: System Shutdown Notification
+#      msg: System Shutdown Imminent.  Please save your work and log off before
+#      async:
+
+      
+  - name: Start Reboot
+    # Reboot a slow machine that might have lots of updates to apply
+    win_reboot:
+      pre_reboot_delay: 10
+      reboot_timeout: 3600
+    when: ansible_facts['os_family'] == "Windows"
+
+  - name: reboot linux
+    reboot:
+    when: ansible_facts['os_family'] != "Windows"

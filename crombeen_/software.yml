@@ -1,0 +1,32 @@
+- hosts: computers
+  gather_facts: no
+  tasks:
+  - name: Test system connection
+    wait_for_connection:
+      timeout: 10
+
+  - name: Upgrade existing software
+    win_chocolatey:
+      name: all
+      state: latest
+    tags: software
+
+#  - name: Install/remove java
+#    win_chocolatey:
+#      name: '{{ item }}'
+#      state: '{{ "present" if inventory_hostname in groups["administratie"] else "absent" }}'
+#    with_items:
+#    - javaruntime-preventasktoolbar
+#    - jre8
+
+#  - name: Install Windows updates
+#    win_updates:
+#      state: installed
+
+- hosts: computer23:computer26:computer41:computer43:computer48
+  tasks:
+  - name: Install dropbox
+    win_chocolatey:
+      name: dropbox
+      state: latest
+  tags: dropbox

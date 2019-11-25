@@ -1,0 +1,5 @@
+- hosts: all
+  ignore_unreachable: true
+  tasks:
+  - name: run setup
+    setup:

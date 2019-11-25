@@ -1,0 +1,47 @@
+# Copyright 2017, Dag Wieers <dag@wieers.com>
+#
+# This playbook wakes up all/selected desktop systems. It is intended to be
+# used before running any Ansible maintenance playbooks system-wide.
+
+- hosts: all
+  gather_facts: no
+  serial: 10
+  ignore_unreachable:
+
+#  vars:
+#    wake_server: localhost
+  vars:
+    macaddress: "{{ (ansible_interfaces|first).macaddress|default(mac|default('')) }}"
+
+  tasks:
+  - name: Send magic Wake-On-Lan packet to turn on individual systems via gateway {{ wake_server }}
+    win_wakeonlan:
+      mac: '{{ macaddress }}'
+      broadcast: 10.30.255.255
+    delegate_to: '{{ wake_server }}'
+    when: wake_server is defined
+
+  - wakeonlan:
+      mac: '{{ macaddress }}'
+      broadcast: 10.30.255.255
+    delegate_to: localhost
+    when: wake_server is not defined
+
+  # Advanced idempotent implementation
+#  - wakeonlan-adv:
+#      mac: '{{ macaddress }}'
+#      broadcast: 192.168.234.1
+#      port: 9
+#      check_arp: no
+#      timeout: 10
+#    become: yes
+#    delegate_to: localhost
+#    when: wake_server is not defined
+
+- hosts: all
+  gather_facts: no
+  tags: test
+  tasks:
+  - name: Wait for the system's WinRM service to come online
+    wait_for_connection:
+      timeout: 20

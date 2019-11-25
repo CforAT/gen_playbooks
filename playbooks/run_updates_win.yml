@@ -1,0 +1,33 @@
+- hosts: all
+  serial: 1
+  ignore_unreachable: True
+  ignore_errors: True
+  tasks:
+
+  - name: Install Windows updates
+    win_updates:
+      category_names:
+        - "Critical Updates"
+        - "CriticalUpdates"
+        - "Feature Packs"
+        - "Security Updates"
+        - "Connectors"
+        - "Definition Updates"
+        - "Update Rollups"
+        - "Updates"
+        - "Guidance"
+        - "Application"
+        - "Tools"
+        - "Service Packs"
+        - UpdateRollups
+        - Tools
+        - Application
+        - "Windows Server 2016"
+        - "Windows Server 2019"
+        - Updates
+      #log_path: C:\Crombeen\Logs\win_updates.log
+      reboot: yes
+      state: installed
+      #        use_scheduled_task: no # not required. 
+      # Will not auto elevate the remote process with I(become) and use a scheduled task instead.
+      # ,Set this to C(yes) when using this module with async on Server 2008, 2008 R2, or Windows 7, or on Server 2008 that is not authenticated with basic or credssp.,Can also be set to C(yes) on newer hosts where become does not work due to further privilege restrictions from the OS defaults.

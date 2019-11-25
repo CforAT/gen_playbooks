@@ -1,0 +1,248 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2017, Dag Wieers <dag@wieers.com>
+#
+# This playbook cleans up a Windows 10 system. It is intended to be used on
+# systems on a regular basis to clean up disk space and remove stale software.
+
+- hosts: computers
+  gather_facts: no
+  tasks:
+  - name: Test system connection
+    wait_for_connection:
+      timeout: 20
+    tags: software
+
+  - name: Clean chocolatey/nuget cache
+    win_file:
+      path: '{{ item }}'
+      state: absent
+    with_items:
+    - '%UserProfile%\AppData\Local\Temp\chocolatey\'
+    - '%UserProfile%\AppData\Local\Temp\nuget\'
+    - '%UserProfile%\AppData\Local\NuGet\Cache\'
+    tags: cache
+
+  - name: Remove unwanted software using Chocolatey
+    win_chocolatey:
+      name: '{{ item }}'
+      state: absent
+    with_items:
+    - adblockplusfirefox
+    - adobeair
+#    - adobereader-de
+#    - adobereader
+#    - adobereader-update
+    - adobeshockwaveplayer
+    - autoruns
+    - avastbrowsercleanup
+    - avastfreeantivirus
+    - avgantivirusfree
+    - avginternetsecurity
+    - avgpctuneup
+    - avirafreeantivirus
+#    - dropbox
+    - flashplayerplugin
+    - flashplayeractivex
+    - freerdp
+    - libreoffice
+    - openoffice
+    - procexp
+    - quicktime
+    - windbg
+    tags:
+    - chocolatey
+    - software
+
+- hosts: computerlokaal:extra:technieklokaal:new
+  strategy: free
+  tasks:
+  - name: Remove software
+    win_shell: |
+      $changed = $false
+      $apps = Get-WmiObject -Class Win32_Product | Where-Object {
+        $_.Name -like "{{item}}"
+      }
+
+      if ($apps.Count -eq 0) {
+        Write-Host "No package found named '{{ item }}'"
+        exit 0
+      }
+
+      ForEach ($app in $apps) {
+        Write-Host "DEBUG: $app"
+        Try {
+          $app.Uninstall()
+          $changed = $true
+          Write-Host "Successfully uninstalled app '${$app.Name}"
+        } Catch {
+          Write-Host "Error: ${$_.Exception.Messsage}"
+          exit 2
+        }
+      }
+
+      if ($changed) {
+        exit 1
+      }
+
+      exit 0
+
+    with_items:
+    - Adobe AIR
+    - Adobe Flash Player 10 ActiveX
+    - Acrobat Reader X
+    - Lenovo Solution Center
+    - SDK Debuggers
+    # Lenovo laptops
+    - Absolute Reminder
+    - Alcor Micro Smart Card Reader Driver
+    - Corel WinDVD
+    - Google Toolbar for Internet Explorer
+    - Integrated Camera
+    #- Intel(R) PROSet/Wireless Driver
+    #- Intel(R) PROSet/Wireless Software for Bluetooth(R)*
+    - Intel(R) Smart Connect Technology 4.1 x64
+    - Intel(R) WiDi
+    - Inst5676
+    - Lenovo Auto Scroll Utility
+    - Lenovo Mobile Broadband Activation
+    - Lenovo Power Management Driver
+    - Lenovo QuickCast
+    - Lenovo QuickControl
+    - Lenovo User Guide
+    - Lenovo Welcome
+    - Message Center Plus
+    #- Microsoft Visual C++ *
+    #- Intel® PROSet/Wireless WiFi Software
+    - Intel(R) SDK for OpenCL*
+    - Intel(R) USB 3.0*
+    - Mobile Broadband Drivers
+    - Nitro Pro 8
+    - Norton Internet Security
+    - On Screen Display
+    - Realtek Card Reader
+    - Realtek High Definition Audio Driver
+    - Registry Patch to Enable Maximum Power Saving*
+    - Stuurprogramma voor Intel® Graphics*
+    - SugarSync Manager
+    - Thinkpad UltraNav Driver
+    - ThinkVantage Access Connections
+    - ThinkVantage Active Protection System
+    - ThinkVantage Communications Utility
+    - ThinkVantage AutoLock
+    - Thinkpad UltraNav Utility
+    - Thinkpad UltraNav DriverA
+    - Thinkpad Modem Adapter
+    - Validity WBF DDK 5011
+    - VIPAccess
+    - Windows Driver Package *
+    - Windows Live Mesh *
+    register: this
+    failed_when: this.rc > 1
+    changed_when: this.rc == 1
+    tags:
+    - windows
+    - purge
+
+#  - name: Disable Windows Features
+#    win_feature:
+#      name: '{{ item }}'
+#      state: absent
+#    with_items:
+#    - Hearts
+#    - Internet-Explorer-Optional-amd64
+
+- hosts: computerlokaal
+  tasks:
+  - name: Remove all Appx packages for user leerling
+    win_shell: |
+      Get-AppxPackage | Remove-AppxPackage
+    register: appx
+    changed_when: "'Deployment operation progress: ' in appx.stderr"
+    failed_when: no
+    become: leerling
+    tags: appx
+
+  - name: Remove all Appx packages for user leerling
+    win_shell: |
+      Get-AppxPackage -User leerling | Remove-AppxPackage
+    register: appx
+    changed_when: "'Deployment operation progress: ' in appx.stderr"
+    failed_when: no
+    tags: appx
+
+- hosts: computers
+  tasks:
+  - name: Remove all Appx packages for this user
+    win_shell: |
+      Get-AppxPackage | Remove-AppxPackage
+      #Get-AppxPackage -AllUsers | Remove-AppxPackage
+    register: appx
+    changed_when: "'Deployment operation progress: ' in appx.stderr"
+    failed_when: no
+    tags: appx
+
+  - name: Remove all Appx provisioned packages
+    win_shell: |
+      Get-AppxProvisionedPackage -Online | Remove-AppxProvisionedPackage -Online
+    register: appx
+#    changed_when: "'Deployment operation progress: ' in appx.stderr"
+    failed_when: no
+    become: yes
+    tags: appx
+
+#- hosts: computers
+#  tasks:
+#  - win_shell: |
+#      Get-AppxPackage -AllUsers -Name {{ item }} | Remove-AppxPackage
+#      #Get-AppxPackage -Name {{ item }} | Remove-AppxPackage
+#    with_items:
+#    - 4DF9E0F8.Netflix
+#    - 9E2F88E3.Twitter
+#    - '*CandyCrush*'
+#    - E046963F.LenovoCompanion
+#    - Microsoft.3DBuilder
+#    - Microsoft.Advertising.Xaml
+#    - Microsoft.Appconnector
+#    - Microsoft.BingFinance
+#    - Microsoft.BingNews
+#    - Microsoft.BingSports
+#    - Microsoft.BingWeather
+#    - Microsoft.CommsPhone
+#    - Microsoft.ConnectivityStore
+#    - Microsoft.DesktopAppInstaller
+#    - Microsoft.Getstarted
+#    - Microsoft.Messaging
+#    - Microsoft.MicrosoftOfficeHub
+#    - Microsoft.MicrosoftSolitaireCollection
+#    - Microsoft.Office.OneNote
+#    - Microsoft.Office.Sway
+#    - Microsoft.OneConnect
+#    - Microsoft.People
+#    - Microsoft.Services.Store.Engagement
+#    - Microsoft.SkypeApp
+#    - Microsoft.StorePurchaseApp
+#    - Microsoft.WindowsAlarms
+#    - Microsoft.WindowsCamera
+#    - Microsoft.windowscommunicationsapps
+#    #- Microsoft.WindowsDVDPlayer
+#    - Microsoft.WindowsFeedbackHub
+#    - Microsoft.WindowsMaps
+#    - Microsoft.WindowsPhone
+#    - Microsoft.Windows.Photos
+#    - Microsoft.WindowsStore
+#    - Microsoft.XboxApp
+#    - Microsoft.XboxIdentityProvider
+#    - Microsoft.ZuneMusic
+#    - Microsoft.ZuneVideo
+#    - TuneIn.TuneInRadio
+#    register: appx
+#    changed_when: "'Deployment operation progress: ' in appx.stderr"
+##    failed_when: no
+#    tags:
+#    - appx
+#    - windows
+
+#  - raw: >
+#      $e = (New-Object -Com Shell.Application).NameSpace('shell:::{4234d49b-0245-4df3-b780-3893943456e1}')
+#      $e.Items() | %{$_.Verbs()} | ?{$_.Name.replace('&','') -match 'Unpin from Start'} | %{$_.DoIt()}

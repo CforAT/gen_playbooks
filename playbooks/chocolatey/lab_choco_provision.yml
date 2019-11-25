@@ -1,0 +1,36 @@
+- hosts: all
+  strategy: free
+  tasks:
+  - name: ensure Chocolatey itself is installed and use internal repo as source
+    win_chocolatey:
+      name: chocolatey
+      source: https://iis_host1.cforat.org/chocolatey
+
+  - name: update packages from internal
+    win_chocolatey:
+      name: all
+      state: latest
+
+  - name: install foxit from internal with args                                        
+    win_chocolatey:
+      name: foxitreader
+      install_args: "/LANG=en"
+      state: latest
+      source: https://iis_host1.cforat.org/chocolatey
+
+
+ 
+
+  - name: install vlc player from internal with args
+    win_chocolatey:
+      name: vlc
+      install_args: "/Language:en"
+      state: latest                                    
+      source: https://iis_host1.cforat.org/chocolatey
+
+  - name: install other packages that don't require extra args
+    win_chocolatey:
+      name: googlechrome,firefox,sysinternals
+      state: latest                                    
+      source: https://iis_host1.cforat.org/chocolatey
+

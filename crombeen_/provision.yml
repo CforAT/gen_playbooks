@@ -1,0 +1,76 @@
+# Copyright 2017, Dag Wieers <dag@wieers.com>
+
+# This playbook installs the initial software collection. It is intended to
+# be used on newly installed systems. Or whenever this playbook changes.
+
+- hosts: computers
+#  strategy: free
+  tasks:
+  # NOTE: Installation of Chocolatey is taken care of win_chocolatey
+  - name: Install chocolatey/powershell on new systems
+    win_chocolatey:
+      name: powershell
+      state: present
+      execution_timeout: 0
+    tags: powershell
+
+  - name: Install extra software
+    win_chocolatey:
+      name:
+      - 7zip
+      - audacity
+#      - cdex
+      - chocolateygui
+      - firefox
+      - gimp
+      - googlechrome
+#      - googleearth
+      - infrarecorder
+      - inkscape
+      - keepass.install
+      - libreoffice-oldstable
+      - notepadplusplus
+#      - rdpwrapper
+      - sysinternals
+      - tigervnc
+      - tipp10
+      - vlc
+      - windirstat
+      - adblockplus-firefox
+      - adblockplusie
+      - adblockpluschrome
+      state: present
+      execution_timeout: 0
+    tags: software
+    ignore_errors: yes
+
+  # NOTE: Google Drive File Stream should not be installed using Chocolatey
+  #       It updates itself
+  - name: Remove Google Drive File Stream
+    win_chocolatey:
+      name: google-drive-file-stream
+      state: absent
+      execution_timeout: 0
+      ignore_checksums: yes
+      force: yes
+    ignore_errors: yes
+    tags: gdrive
+
+# TODO: Remove dropbox from systems
+- hosts: dropbox
+  tasks:
+  - name: Install dropbox
+    win_chocolatey:
+      name: dropbox
+      state: latest
+      execution_timeout: 0
+  tags: dropbox
+
+- hosts: adobe
+  tasks:
+  - name: Install Adobe Acrobat Reader
+    win_chocolatey:
+      name: adobereader-update
+      state: latest
+      execution_timeout: 0
+  tags: acrobat

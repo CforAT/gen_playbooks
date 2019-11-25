@@ -1,0 +1,7 @@
+- hosts: all
+  ignore_unreachable: True
+  tasks:
+  
+      
+  - name: Schedule shutdown for 10 min
+    win_command: "Shutdown /s /t 300"

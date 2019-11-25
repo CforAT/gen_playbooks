@@ -1,0 +1,36 @@
+- hosts: all
+  gather_facts: no
+  strategy: free
+  vars:
+    - class_keyboarding: "{{ keyboarding | default('false') }}"
+    - class_seniorconnects: "{{ seniorconnects | default('false') }}"
+    - autologin_active: "{{ autologon_on | default('true')}}"
+    - pre_delay: "{{ warning_time | default('30') }}"
+    - message: "{{ user_message | default('Please save your work.  The computer will Shut Down Shortly') }}"
+    - autologin_name: "{{ ansible_facts.hostname }}"
+    - autologon_password: "{{ account_password }}"
+
+  tasks:
+  - debug:
+      msg: "autologin name: {{ autologin_name }} \n"
+
+  - name: Configure autologon account
+    when: autologin_active == true
+    win_command: "Autologon.exe {{ autologin_name }} CFORAT.ORG {{ autologon_password }}"
+
+
+
+  - name: Disable Autologon, change registry key
+    when:
+      - autologin_active == false
+    win_regedit:
+       path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+       name: AutoAdminLogon
+       data: 0
+
+
+  - name: Reboot Computer
+    win_reboot:
+        pre_reboot_delay: "{{ pre_delay }}" # not required. Seconds for shutdown to wait before requesting reboot
+        test_command: whoami # not required. Command to expect success for to determine the machine is ready for management
+        msg: "{{ message }}" # not required. Message to display to users

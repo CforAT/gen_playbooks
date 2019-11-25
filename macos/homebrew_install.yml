@@ -1,0 +1,13 @@
+- hosts: all
+  tasks:
+    - name: homebrew update and install packages
+      homebrew:
+        name: youtube-dl
+        state: latest
+        update_homebrew: yes
+        upgrade_all: yes
+
+    - name: homebrew cask
+      homebrew_cask:
+        name: visual-studio-code
+        state: upgraded

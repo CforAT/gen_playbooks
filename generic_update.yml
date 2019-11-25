@@ -1,0 +1,81 @@
+- hosts: all
+  ignore_unreachable: True
+  vars:
+    - rebt: "{{ reboot_now | default('false') }}"
+    - chc_pres: "{{ choco_presence | default('false') }}"
+  tasks:
+    - debug:
+        msg: "{{ chc_pres }}"
+
+    - name: update packages from internal
+      become: no
+      win_chocolatey:
+       name: all
+       state: latest
+       source: https://iis_host1.cforat.org/chocolatey
+      when:
+        - ansible_facts['os_family'] == "Windows"
+        - chc_pres == true
+
+    - name: Install  updates (Windows)
+      become: no
+      win_updates:
+        category_names:
+          - "Critical Updates"
+          - "CriticalUpdates"
+          - "Feature Packs"
+          - "Security Updates"
+          - "Connectors"
+          - "Definition Updates"
+          - "Update Rollups"
+          - "Updates"
+          - "Guidance"
+          - "Application"
+          - "Tools"
+          - "Service Packs"
+          - UpdateRollups
+          - Tools
+          - Application
+          - "Windows Server 2016"
+          - "Windows Server 2019"
+          - Updates
+          - "Drivers"
+        #log_path: C:\Crombeen\Logs\win_updates.log
+        reboot: "{{ rebt }}"
+        state: installed
+        #        use_scheduled_task: no # not required. 
+        # Will not auto elevate the remote process with I(become) and use a scheduled task instead.
+        # ,Set this to C(yes) when using this module with async on Server 2008, 2008 R2, or Windows 7, or on Server 2008 that is not authenticated with basic or credssp.,Can also be set to C(yes) on newer hosts where become does not work due to further privilege restrictions from the OS defaults.
+      when: ansible_facts['os_family'] == "Windows"
+      
+
+    - name: update system (Debian)
+      become: yes
+      become_method: sudo
+      apt:
+          name: '*'
+          update_cache: yes
+          state: latest # not required. choices: absent;build-dep;latest;present. Indicates the desired package state. C(latest) ensures that the latest version is installed. C(build-dep) ensures the package build dependencies are instal
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: update system (RedHat)
+      become: yes
+      become_method: sudo
+      yum:
+          update_cache: yes # not required. Force yum to check if cache is out of date and redownload if needed. Has an effect only if state is I(present) or I(latest).
+          name: '*'
+          state: latest
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: reboot linux if reboot_now is true
+      become: yes
+      become_method: sudo
+      reboot:
+          post_reboot_delay: 15 # not required. Seconds to wait after the reboot was successful and the connection was re-established.,This is useful if you want wait for something to settle despite your connection already working.
+          test_command: whoami # not required. Command to run on the rebooted host and expect success from to determine the machine is ready for further tasks.
+          reboot_timeout: 600 # not required. Maximum seconds to wait for machine to reboot and respond to a test command.,This timeout is evaluated separately for both network connection and test command success so the maximum execution time for the module is twice this amount.
+          msg: Reboot initiated by Ansible # not required. Message to display to users before reboot.
+          connect_timeout: undefined # not required. Maximum seconds to wait for a successful connection to the managed hosts before trying again.,If unspecified, the default setting for the underlying connection plugin is used.
+      when:
+        - ansible_facts['os_family'] != "Windows"
+        - rebt == true

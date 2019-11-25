@@ -1,0 +1,144 @@
+= Using Ansible to manage Windows desktops
+One of the primary goals of this project is to create a systems management solution that would ease our work, but does not create an extra dependency for the infrastructure. If anything, the systems can be managed by hand individually as before.
+
+As part of this project the following modules have been implemented:
+- wakeonlan
+- wait_for_connection
+- win_defrag
+- win_product_facts
+- win_shortcut
+- win_wakeonlan
+
+
+== Configuring the system for Powershell Remoting
+The following actions have to be taken to enable WinRM Powershell remoting.
+
+=== Enable WinRM
+Start Powershell (Run as Administrator) and run the following command:
+
+    WinRM qc
+
+Answer *yes* on each question asked.
+
+=== Allow Powershell script execution
+Start Powershell (Run as Administrator) and run the following command:
+
+    Set-ExecutionPolicy
+
+Enter the policy to be used: +Bypass+
+
+Answer *yes* when asked to change the policy.
+
+(Or use proper client certificates, which we plan to do)
+
+=== Allow Powershell remoting for Ansible
+Start Powershell (Run as Administrator) and run the following command:
+
+    ConfigureRemotingForAnsible.ps1 -CertValidityDays 3650 -EnableCredSSP
+
+=== Enable Wake-on-LAN (WoL)
+In order to automatically turn on systems when doing maintenance, we configured the systems to support Wake-on-LAN.
+Most systems are configured this way automatically, however in some cases they need specific changes to make them work as we like.
+
+=== BIOS settings
+Boot the system using the F1 key pressed to enter the BIOS.
+
+Inside the (Lenovo) BIOS go to *Startup > Automatic Boot Sequence* and move the *Network* entries down using the minus key (*-*).
+Ensure that the first entry is the local boot disk.
+
+Save the configuration using the *F10* key and select *Yes*.
+
+=== Windows settings
+No specific configuration is needed to make Wake-on-LAN work on the Lenovo systems in Windows 10.
+
+== Using Ansible
+More information is available from: http://docs.ansible.com/ansible/intro_windows.html
+
+=== Capabilities
+The following things we can manage using Ansible today:
+
+ - Turn on systems (using Wake-On-Lan)
+ - Collect information from the system (e.g. Name, MAC address, IP addres, hardware) into a CSV
+ - Manage energy settings
+ - Apply system updates
+ - https://chocolatey.org/[Installing and removing software] (incl. everything from Ninite)
+ - Enable/disable system services
+ - Apply/merge registry settings
+   * https://blogs.technet.microsoft.com/heyscriptingguy/2013/01/17/use-powershell-to-change-the-mouse-pointer-scheme/[Change mouse pointer to Extra Large]
+   * http://ccmexec.com/2015/09/customizing-the-windows-10-start-menu-and-add-ie-shortcut-during-osd/[Modifying the start menu]
+   * Setting up International(ization) and Keyboard Layout
+ - Customize desktop icons
+ - Defragment filesystem(s)
+ - Install printer drivers and configure printers
+
+Still need to be implement:
+
+ * Missing automation
+   - Customize start menu (disable tiles, change start menu settings)
+   - Customize task bar (pinning apps in task bar in specific order)
+   - Customize system tray
+   - Customize desktop icons (position desktop icons)
+ * Missing facts
+   - Disk information (size, free-space) using **win_disk_facts**
+ * Security
+   - Limit headphone loudness for children
+   - Run applications as another user with unknown password *(should be possible now)*
+
+
+== Instructions
+Existing Ansible playbooks are available from: https://github.com/crombeen/ansible
+
+=== Turning on desktops using WoL
+    $ ansible-playbook -k wakeonlan.yml
+
+=== Collect information (creates inventory in CSV format)
+    $ ansible-playbook -k collect.yml
+
+=== Manage software
+    $ ansible-playbook -k provision.yml
+    $ ansible-playbook -k software.yml
+    $ ansible-playbook -k cleanup.yml
+
+== Manage system configuration
+    $ ansible-playbook -k config.yml
+    $ ansible-playbook -k desktop.yml
+
+=== Manage local users
+    $ ansible-playbook -k users.yml
+
+=== Manage RDP and OneDrive
+    $ ansible-playbook -k rdesktop.yml
+    $ ansible-playbook -k onedrive.yml
+
+=== Run everything
+    $ ansible-playbook -k site.yml
+
+
+== Problems
+Here is a list of problems today:
+
+ - Often command line desktop management was an afterthought in Windows, not designed with it in mind.
+
+ - A lot of (desktop) manipulations require registry edits because out-of-the-box cmdlets do not exist.
+
+ - Hard to predict how registry modifications will survive Windows 10 updates.
+
+ - Powershell is a big improvement over cmd.exe, however it feels like Perl 4 (1993) more than anything modern (encountered various inconsistencies and design issues).
+
+ - Since we have Windows 10 Home OEM licenses, Microsoft's solution (Active Directory and Group Policies) is not an option, and we prefer open tooling and manageable actions.
+
+ - Microsoft disables WinRM on every Windows 10 upgrade (every 6 months)
+
+
+== Resources
+More resources related to Powershell and Ansible-integration below:
+
+=== Ansible
+
+ - http://docs.ansible.com/ansible/intro_windows.html[Ansible Windows support]
+ - http://docs.ansible.com/ansible/list_of_windows_modules.html[Ansible Windows modules]
+ - https://github.com/trondhindenes/Ansible-Auto-Generated-Modules[Powershell DSC modules] - DSC community auto-generated modules
+
+=== Powershell
+
+ - https://developer.rackspace.com/blog/powershell-101-from-a-linux-guy/[Powershell 101 from a Linux guy]

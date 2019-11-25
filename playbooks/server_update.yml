@@ -1,0 +1,26 @@
+- hosts: all
+  tasks:
+  - name: update centos packages
+    yum:
+      name: '*'
+      state: latest
+    when: ansible_facts['distribution'] == "CentOs"
+
+  - name: update ubuntu
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+    when: ansible_facts['os_family'] == "Debian"
+
+  - name: update windows
+    win_updates:
+        reboot_timeout: 1200 # not required. The time in seconds to wait until the host is back online from a reboot.,This is only used if C(reboot=True) and a reboot is required.
+        #log_path: undefined # not required. If set, C(win_updates) will append update progress to the specified file. The directory must already exist.
+        #whitelist: undefined # not required. A list of update titles or KB numbers that can be used to specify which updates are to be searched or installed.,If an available update does not match one of the entries, then it is skipped and not installed.,Each entry can either be the KB article or Update title as a regex according to the PowerShell regex rules.,The whitelist is only validated on updates that were found based on I(category_names). It will not force the module to install an update if it was not in the category specified.
+        category_names: Application,Application,Connectors,CriticalUpdates,DefinitionUpdates,DeveloperKits,FeaturePacks,Guidance,SecurityUpdates,ServicePacks,Tools,UpdateRollups,Updates # not required. choices: Application;Connectors;CriticalUpdates;DefinitionUpdates;DeveloperKits;FeaturePacks;Guidance;SecurityUpdates;ServicePacks;Tools;UpdateRollups;Updates. A scalar or list of categories to install updates from
+        reboot: yes # not required. Ansible will automatically reboot the remote host if it is required and continue to install updates after the reboot.,This can be used instead of using a M(win_reboot) task after this one and ensures all updates for that category is installed in one go.,Async does not work when C(reboot=True).
+        use_scheduled_task: no # not required. Will not auto elevate the remote process with I(become) and use a scheduled task instead.,Set this to C(yes) when using this module with async on Server 2008, 2008 R2, or Windows 7, or on Server 2008 that is not authenticated with basic or credssp.,Can also be set to C(yes) on newer hosts where become does not work due to further privilege restrictions from the OS defaults.
+        #blacklist: undefined # not required. A list of update titles or KB numbers that can be used to specify which updates are to be excluded from installation.,If an available update does match one of the entries, then it is skipped and not installed.,Each entry can either be the KB article or Update title as a regex according to the PowerShell regex rules.
+        state: installed # not required. choices: installed;searched. Controls whether found updates are returned as a list or actually installed.,This module also supports Ansible check mode, which has the same effect as setting state=searched
+    when: ansible_facts['os_family'] == "Windows"

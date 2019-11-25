@@ -1,0 +1,27 @@
+- name: install Chocolatey Server with the defaults
+  hosts: iis_servers
+  gather_facts: no
+  roles:
+  - jborean93.win_chocolatey_server
+
+- name: setup Chocolatey with HTTPS listener on custom path and enable basic authentication
+  hosts: iis_servers
+  gather_facts: no
+  vars:
+ #   opt_chocolatey_server_api_token: eb82582c-2214-4ce9-9689-8c823ae33e45
+ #   opt_chocolatey_server_credentials:
+ #     build-team: '{{ build_team_pass | hash("sha1") | upper }}'
+ #     test-team: '{{ test_team_pass | hash("sha1") | upper }}'
+ #     build-team: '{{ build_team_pass | hash("sha1") | upper }}'
+    opt_chocolatey_server_http_port: 8080
+    opt_chocolatey_server_https_port: 8443
+    opt_chocolatey_server_path: D:\tools
+#    opt_chocolatey_server_chocolatey_url: https://internalrepo.domain/chocolatey.0.10.11.nupkg
+
+  roles:
+  - jborean93.win_chocolatey_server
+
+  post_tasks:
+  - name: output the cert hash used for the HTTPS bindings
+    debug:
+      var: out_chocolatey_server_https_certificate
