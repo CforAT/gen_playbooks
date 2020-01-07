@@ -10,17 +10,17 @@ become: true
 tasks:
 - name: Add a new user
   user:
-          name: {{ uname }}
+          name: '{{ uname }}'
           shell: /bin/bash
-          password: {{ userpassword }}
+          password: '{{ userpassword }}'
 - name: Add user to the sudoers
   copy:
      dest: "/etc/sudoers.d/{{ uname }}"
      content: "{{ uname }}  ALL=(ALL)  NOPASSWD: ALL"
 - name: Deploy SSH Key
   authorized_key: 
-     user: {{ uname }}
-     key: {{ pubkey_url }}
+     user: '{{ uname }}'
+     key: '{{ pubkey_url }}'
      state: present
 - name: Disable Password Authentication
   lineinfile:
