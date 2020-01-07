@@ -38,8 +38,8 @@
                backup: yes
        notify:
           - restart ssh
-       handlers:
-        - name: restart ssh
-          service:
-                    name: sshd
-                    state: restarted
+     handlers:
+     - name: restart ssh
+       service:
+               name: sshd
+               state: restarted
