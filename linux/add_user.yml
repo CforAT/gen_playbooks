@@ -1,0 +1,45 @@
+---
+hosts: all
+vars:
+     - uname: "{{ user_username }}"
+     - userpassword: '{{ user_passwd }}'
+     - pubkey_url: "{{ pub_key_url }}"
+gather_facts: no
+become: true
+
+tasks:
+- name: Add a new user
+  user:
+          name: {{ uname }}
+          shell: /bin/bash
+          password: {{ userpassword }}
+- name: Add user to the sudoers
+  copy:
+     dest: "/etc/sudoers.d/{{ uname }}"
+     content: "{{ uname }}  ALL=(ALL)  NOPASSWD: ALL"
+- name: Deploy SSH Key
+  authorized_key: 
+     user: {{ uname }}
+     key: {{ pubkey_url }}
+     state: present
+- name: Disable Password Authentication
+  lineinfile:
+          dest=/etc/ssh/sshd_config
+          regexp='^PasswordAuthentication'
+          line="PasswordAuthentication no"
+          state=present
+          backup=yes
+- name: Disable Root Login
+  lineinfile:
+          dest=/etc/ssh/sshd_config
+          regexp='^PermitRootLogin'
+          line="PermitRootLogin no"
+          state=present
+          backup=yes
+  notify:
+     - restart ssh
+handlers:
+- name: restart ssh
+  service:
+          name=sshd
+          state=restarted
