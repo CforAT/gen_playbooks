@@ -4,6 +4,7 @@
           - uname: "{{ user_username }}"
           - userpassword: '{{ user_passwd }}'
           - pubkey_url: "{{ pub_key_url }}"
+          - admin_priv: {{ has_admin | false }}
      gather_facts: no
      become: true
 
@@ -17,6 +18,7 @@
        copy:
           dest: "/etc/sudoers.d/{{ uname }}"
           content: "{{ uname }}  ALL=(ALL)  NOPASSWD: ALL"
+       when: admin_priv is true
      - name: Deploy SSH Key
        authorized_key: 
           user: '{{ uname }}'
