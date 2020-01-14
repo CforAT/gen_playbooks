@@ -44,4 +44,4 @@
   tasks:
   - name: Wait for the system's WinRM service to come online
     wait_for_connection:
-      timeout: 20
+      timeout: 12000 # very slow computers...
