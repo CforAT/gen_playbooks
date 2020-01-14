@@ -60,14 +60,14 @@
           firmware_version: ''
       disk: '{{ (ansible_facts.disks|default(unknown_disks)|selectattr("system_disk")|first).physical_disk }}'
 
-- hosts: computers
+- hosts: all
   serial: 1
   tasks:
   - name: Add or update changes to systems.csv
     lineinfile:
       line: '{{ csv_entry }}'
       regexp: '; "{{ ansible_hostname|upper }}";'
-      dest: /home/dag/home-made/crombeen/systems.csv
+      dest: /home/cforat/collection_output/systems.csv
       state: present
       create: yes
     delegate_to: localhost
