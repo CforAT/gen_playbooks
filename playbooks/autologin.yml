@@ -30,7 +30,13 @@
 
 
   - name: Reboot Computer
-    win_reboot:
-        pre_reboot_delay: "{{ pre_delay }}" # not required. Seconds for shutdown to wait before requesting reboot
-        test_command: whoami # not required. Command to expect success for to determine the machine is ready for management
-        msg: "{{ message }}" # not required. Message to display to users
+    block:
+      - win_reboot:
+          pre_reboot_delay: "{{ pre_delay }}" # not required. Seconds for shutdown to wait before requesting reboot
+          test_command: whoami # not required. Command to expect success for to determine the machine is ready for management
+          msg: "{{ message }}" # not required. Message to display to users
+          reboot_timeout: 12000 # very slow computers, give it a lot of time to come back up
+    rescue:
+      - win_command: powershell.exe -
+        args:
+          stdin: Restart-Computer -Force
