@@ -26,7 +26,6 @@
       broadcast: 10.30.255.255
     #delegate_to: localhost
     # when: wake_server is not defined
-
   # Advanced idempotent implementation
 #  - wakeonlan-adv:
 #      mac: '{{ macaddress }}'

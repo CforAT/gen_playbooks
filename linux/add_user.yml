@@ -4,7 +4,7 @@
           - uname: "{{ user_username }}"
           - userpassword: '{{ user_passwd }}'
           - pubkey_url: "{{ pub_key_url }}"
-          - admin_priv: {{ has_admin | false }}
+          - admin_priv: "{{ has_admin | false }}"
      gather_facts: no
      become: true
 
