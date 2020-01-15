@@ -18,7 +18,7 @@
        copy:
           dest: "/etc/sudoers.d/{{ uname }}"
           content: "{{ uname }}  ALL=(ALL)  NOPASSWD: ALL"
-       when: "{{admin_priv}} is true"
+       when: admin_priv is true
      - name: Deploy SSH Key
        authorized_key: 
           user: "{{ uname }}"
