@@ -2,7 +2,7 @@
    - hosts: all
      vars:
           - uname: "{{ user_username }}"
-          - userpassword: '{{ user_passwd }}'
+          - userpassword: "{{ user_passwd }}"
           - pubkey_url: "{{ pub_key_url }}"
           - admin_priv: "{{ has_admin | false }}"
      gather_facts: no
@@ -11,30 +11,30 @@
      tasks:
      - name: Add a new user
        user:
-               name: '{{ uname }}'
+               name: "{{ uname }}"
                shell: /bin/bash
-               password: '{{ userpassword }}'
+               password: "{{ userpassword }}"
      - name: Add user to the sudoers
        copy:
           dest: "/etc/sudoers.d/{{ uname }}"
           content: "{{ uname }}  ALL=(ALL)  NOPASSWD: ALL"
-       when: '{{admin_priv}} is true'
+       when: "{{admin_priv}} is true"
      - name: Deploy SSH Key
        authorized_key: 
-          user: '{{ uname }}'
-          key: '{{ pubkey_url }}'
+          user: "{{ uname }}"
+          key: "{{ pubkey_url }}"
           state: present
      - name: Disable Password Authentication
        lineinfile:
                dest: /etc/ssh/sshd_config
-               regexp: '^PasswordAuthentication'
+               regexp: "^PasswordAuthentication"
                line: "PasswordAuthentication no"
                state: present
                backup: yes
      - name: Disable Root Login
        lineinfile:
                dest: /etc/ssh/sshd_config
-               regexp: '^PermitRootLogin'
+               regexp: "^PermitRootLogin"
                line: "PermitRootLogin no"
                state: present
                backup: yes
