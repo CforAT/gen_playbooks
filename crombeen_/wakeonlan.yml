@@ -12,7 +12,7 @@
 #    wake_server: localhost
   vars:
     macaddress: "{{ (ansible_interfaces|first).macaddress|default(mac|default('')) }}"
-    wake_server: {{ wake_server }}
+    wake_server: "{{ wake_server }}"
   tasks:
   - name: Send magic Wake-On-Lan packet to turn on individual systems via gateway {{ wake_server }}
     win_wakeonlan:
