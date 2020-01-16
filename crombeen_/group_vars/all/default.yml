@@ -7,7 +7,7 @@
 #ansible_psrp_auth: credssp
 #ansible_psrp_auth: ntlm
 #ansible_psrp_cert_validation: ignore
-3ansible_psrp_operation_timeout: 7
+#ansible_psrp_operation_timeout: 7
 #ansible_psrp_connection_timeout: 8
 #ansible_psrp_read_timeout: 32
 a#nsible_psrp_reconnection_retries: 2
@@ -32,5 +32,6 @@ ansible_winrm_read_timeout_sec: 1800
 
 ansible_become_method: runas
 has_admin: false
+wake_server: localhost
 #ansible_become_user: ictadmin
 # ansible_become_pass: '{{ ansible_winrm_password }}'

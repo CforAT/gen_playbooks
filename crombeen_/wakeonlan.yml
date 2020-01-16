@@ -5,14 +5,15 @@
 
 - hosts: all
   gather_facts: no
-  serial: 10
+  strategy: free
+  serial: 14
   ignore_unreachable:
 
 #  vars:
 #    wake_server: localhost
   vars:
     macaddress: "{{ (ansible_interfaces|first).macaddress|default(mac|default('')) }}"
-    # wake_serv: "{{ wake_server }}"
+    wake_serv: "{{ wake_server }}"
   tasks:
   # - name: Send magic Wake-On-Lan packet to turn on individual systems via gateway {{ wake_server }}
   #   win_wakeonlan:
@@ -24,7 +25,7 @@
   - win_wakeonlan:
       mac: '{{ macaddress }}'
       broadcast: 10.30.255.255
-    #delegate_to: localhost
+      delegate_to: {{ wake_serv }}
     # when: wake_server is not defined
   # Advanced idempotent implementation
 #  - wakeonlan-adv:
