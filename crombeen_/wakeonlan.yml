@@ -25,7 +25,7 @@
   - win_wakeonlan:
       mac: '{{ macaddress }}'
       broadcast: 10.30.255.255
-      delegate_to: {{ wake_serv }}
+      delegate_to: "{{ wake_serv }}"
     # when: wake_server is not defined
   # Advanced idempotent implementation
 #  - wakeonlan-adv:
