@@ -6,18 +6,23 @@
       name: chocolatey
       source: https://iis_host1.cforat.org/chocolatey
 
-  - name: update packages from internal
-    win_chocolatey:
-      name: all
-      state: latest
+  - name: chocolatey feature config
+    win_chocolatey_feature:
+       name: useRememberedArgumentsForUpgrades # required. The name of the feature to manage.,Run C(choco.exe feature list) to get a list of features that can be managed.
+       state: enabled # not required. choices: disabled;enabled. When C(disabled) then the feature will be disabled.,When C(enabled) then the feature will be enabled.
 
-  - name: install foxit from internal with args                                        
+
+  - name: install foxit args                                        
     win_chocolatey:
       name: foxitreader
       install_args: "/LANG=en"
       state: latest
       source: https://iis_host1.cforat.org/chocolatey
 
+  - name: xmind
+    win_chocolatey:
+      name: xmind
+      state: latest
 
  
 
@@ -33,4 +38,9 @@
       name: googlechrome,firefox,sysinternals
       state: latest                                    
       source: https://iis_host1.cforat.org/chocolatey
+
+  - name: update packages from internal
+    win_chocolatey:
+      name: all
+      state: latest
 
