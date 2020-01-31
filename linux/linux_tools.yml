@@ -1,0 +1,48 @@
+hosts: ansible_facts['os_family'] != "Windows"
+
+become: sudo
+tasks:
+ - name: make sure useful utilities are present
+   package:
+    name:
+      - ncdu
+      - mlocate
+      - 'bash-completion-extras'
+      - htop
+      - curl
+      - iotop
+      - virt-what
+      - molly-guard
+      - net-tools
+      - ethtool
+      - ssh
+      - bing
+      - vtprint
+      - mtr-tiny
+      - sudo
+      - sysstat
+      - zip
+      - unzip
+      - vim
+      - iftop
+      - htop
+      - multitail
+      - curl
+      - nano
+      - less
+      - ntp
+      - grepcidr
+      - tshark
+      - netmask
+      - pwgen
+      - rsync
+      - sipcalc
+      - smartmontools
+      - minicom
+      - bzip2
+      - buffer
+      - screen
+      - whois
+      - iperf
+      - pv
+    state: present
