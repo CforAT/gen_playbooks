@@ -1,4 +1,4 @@
-- hosts: ansible_facts['os_family'] != "Windows"
+- hosts: all
 
   become: sudo
   tasks:
