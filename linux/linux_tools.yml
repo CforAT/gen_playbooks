@@ -7,12 +7,11 @@
       name:
         - ncdu
         - mlocate
-        - 'bash-completion-extras'
         - htop
         - curl
         - iotop
         - virt-what
-        - molly-guard
+        # - molly-guard
         - net-tools
         - ethtool
         - ssh
@@ -46,3 +45,9 @@
         - iperf
         - pv
       state: present
+
+  - name: make sure useful utilities are present
+    when: ansible_facts['os_family'] == "RedHat"
+    package:
+      name:
+        - 'bash-completion-extras'
