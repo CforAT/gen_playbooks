@@ -1,0 +1,15 @@
+hosts: all
+gather_facts: yes
+
+vars:
+    - root_trust_public: {{ root_cert }}
+tasks:
+    - name: add root cert ubuntu
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: add root cert centos/rhel
+      when: ansible_facts['os_family'] == "RedHat"
+
+    - name: root cert present windows
+      when: ansible_facts['os_family'] == "Windows"
+      
