@@ -9,14 +9,15 @@
     - message: "{{ user_message | default('Please save your work.  The computer will Shut Down Shortly') }}"
     - autologin_name: "{{ ansible_facts.hostname }}"
     - autologon_password: "{{ account_password }}"
+    - autologon_name_prefix: "{{ autologon_prefix | default('') }}"
 
   tasks:
   - debug:
-      msg: "autologin name: {{ autologin_name }} \n"
+      msg: "autologin name: {{ autologon_name_prefix }}{{ autologin_name }} \n"
 
   - name: Configure autologon account
     when: autologin_active == true
-    win_command: "Autologon.exe {{ autologin_name }} CFORAT.ORG {{ autologon_password }}"
+    win_command: "Autologon.exe {{ autologon_name_prefix }}{{ autologin_name }} CFORAT.ORG {{ autologon_password }}"
 
 
 
