@@ -1,5 +1,4 @@
 - hosts: all
-  strategy: free
   ignore_unreachable: True
   vars:
     - rebt: "{{ reboot_now | default('false') }}"
