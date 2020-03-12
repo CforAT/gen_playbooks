@@ -46,8 +46,11 @@
         #        use_scheduled_task: no # not required. 
         # Will not auto elevate the remote process with I(become) and use a scheduled task instead.
         # ,Set this to C(yes) when using this module with async on Server 2008, 2008 R2, or Windows 7, or on Server 2008 that is not authenticated with basic or credssp.,Can also be set to C(yes) on newer hosts where become does not work due to further privilege restrictions from the OS defaults.
-      when: ansible_facts['os_family'] == "Windows"
-      
+      win_shell: "restart-computer -Force"
+      when: 
+        - ansible_facts['os_family'] == "Windows"
+        - "{{ rebt }}"
+
 
     - name: update system (Debian)
       become: yes
