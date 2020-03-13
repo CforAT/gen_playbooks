@@ -1,5 +1,6 @@
 - hosts: all
   ignore_unreachable: True
+  gather_facts: yes
   vars:
     - rebt: "{{ reboot_now | default('false') }}"
     - chc_pres: "{{ choco_presence | default('false') }}"
@@ -53,7 +54,7 @@
       win_shell: "restart-computer -Force"
       when:
         - ansible_facts['os_family'] == "Windows"
-        - "{{ rebt }}"      
+        - rebt
 
 
     - name: update system (Debian)
