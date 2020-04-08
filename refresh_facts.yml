@@ -1,0 +1,14 @@
+#
+# This playbook basically does nothing, meant to run on servers
+# via AWX with a template that has 'Enable Fact Cache' checked
+# so that AWX will cache facts for it that can used for smart
+# inventories, etc
+#
+---
+- hosts: "{{ hostgroup | default('all') }}"
+  become: yes
+
+  tasks:
+  - name: Gather job message 
+    debug:
+      msg: Ran AWX gather job
