@@ -6,7 +6,7 @@
 #
 ---
 - hosts: "{{ hostgroup | default('all') }}"
-  become: yes
+  # become: yes
 
   tasks:
   - name: Gather job message 
