@@ -4,14 +4,29 @@
   vars:
     - rebt: "{{ reboot_now | default('false') }}"
   tasks:
-    - name: update system (Debian)
+    - name: update Debian based
       become: yes
-      become_method: sudo
-      apt:
-          name: '*'
-          update_cache: yes
-          state: latest # not required. choices: absent;build-dep;latest;present. Indicates the desired package state. C(latest) ensures that the latest version is installed. C(build-dep) ensures the package build dependencies are instal
       when: ansible_facts['os_family'] == "Debian"
+      block:
+        - name: Update apt repo and cache on all Debian/Ubuntu boxes
+          apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+        - name: Upgrade all packages on servers
+          apt: upgrade=dist force_apt_get=yes
+
+        - name: Check if a reboot is needed on all servers
+          register: reboot_required_file
+          stat: path=/var/run/reboot-required get_md5=no
+
+        - name: Reboot the box if kernel updated
+          reboot:
+            msg: "Reboot initiated by Ansible for kernel updates"
+            connect_timeout: 5
+            reboot_timeout: 300
+            pre_reboot_delay: 0
+            post_reboot_delay: 30
+            test_command: uptime
+          when: reboot_required_file.stat.exists
 
     - name: update system (RedHat)
       become: yes
