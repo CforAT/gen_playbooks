@@ -1,6 +1,6 @@
 - hosts: "{{ inventory | default('all') }}"
   max_fail_percentage: 0
-  serial: 1
+  serial: "{{ serial_count | default(1) }}"
   become: yes
   roles:
     - server-update-reboot
