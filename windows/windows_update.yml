@@ -13,6 +13,7 @@
       win_chocolatey:
        name: all
        state: latest
+       source: 'https://chocolately.org/api/v2/'
       #  source: https://iis_host1.cforat.org/chocolatey
       when:
         - ansible_facts['os_family'] == "Windows"
