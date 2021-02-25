@@ -4,7 +4,8 @@
   - name: ensure Chocolatey itself is installed and use internal repo as source
     win_chocolatey:
       name: chocolatey
-      source: https://iis_host1.cforat.org/chocolatey
+      # source: https://iis_host1.cforat.org/chocolatey
+      source: https://chocolately.org/api/v2/
 
   - name: chocolatey feature config
     win_chocolatey_feature:
@@ -17,7 +18,8 @@
       name: foxitreader
       install_args: "/LANG=en"
       state: latest
-      source: https://iis_host1.cforat.org/chocolatey
+      # source: https://iis_host1.cforat.org/chocolatey
+      source: https://chocolately.org/api/v2/
 
   - name: xmind
     win_chocolatey:
@@ -31,13 +33,15 @@
       name: vlc
       install_args: "/Language:en"
       state: latest                                    
-      source: https://iis_host1.cforat.org/chocolatey
+      # source: https://iis_host1.cforat.org/chocolatey
+      source: https://chocolately.org/api/v2/
 
   - name: install other packages that don't require extra args
     win_chocolatey:
       name: googlechrome,firefox,sysinternals
       state: latest                                    
-      source: https://iis_host1.cforat.org/chocolatey
+      # source: https://iis_host1.cforat.org/chocolatey
+      source: https://chocolately.org/api/v2/
 
   - name: update packages from internal
     win_chocolatey:
